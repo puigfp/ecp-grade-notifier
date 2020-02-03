@@ -1,0 +1,8 @@
+# vs code
+/.vscode/
+
+# python
+/.venv/
+
+# firefox selenium driver
+geckodriver.log

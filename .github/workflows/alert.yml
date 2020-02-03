@@ -1,0 +1,76 @@
+on:
+  push:
+    branches:
+      - master
+  schedule:
+    - cron: "*/30 8-21 * * 1-5"
+
+name: alert
+
+jobs:
+  backup:
+    name: backup
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/setup-python@v1
+        with: { python-version: "3.x" }
+
+      - uses: dschep/install-poetry-action@v1.2
+
+      - uses: actions/checkout@v1
+
+      # XXX:
+      # unfortunately, at the time of writing, the cache action doesn't support scheduled jobs,
+      # still leaving those lines here in case this changes in the future
+      - name: Cache venv
+        id: cache-venv
+        uses: actions/cache@v1
+        with:
+          path: .venv
+          key: venv-${{ hashFiles('poetry.lock') }}
+
+      - name: Setup venv
+        run: |
+          poetry config virtualenvs.in-project true
+          poetry install
+
+      - name: Install gecko driver for selenium
+        # copy-pasted from https://askubuntu.com/a/928514
+        run: |
+          set -e
+          INSTALL_DIR="/usr/local/bin"
+          json=$(curl -s https://api.github.com/repos/mozilla/geckodriver/releases/latest)
+          url=$(echo "$json" | jq -r '.assets[].browser_download_url | select(contains("linux64"))')
+          curl -s -L "$url" | tar -xz
+          chmod +x geckodriver
+          sudo mv geckodriver "$INSTALL_DIR"
+          echo "installed geckodriver binary in $INSTALL_DIR"
+
+      - name: Download latest grades
+        env:
+          ECP_SSO_PASSWORD: ${{ secrets.ECP_SSO_PASSWORD }}
+        run: |
+          source env.sh
+          poetry run python fetch_grades.py > data/grades
+
+      - name: Send alert using Telegram + push new grades to repository
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+        run: |
+          set -e
+          source env.sh
+          git config --local user.name "$GIT_NAME"
+          git config --local user.email "$GIT_EMAIL"
+          git remote set-url origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/$GITHUB_REPOSITORY
+          git status
+          if git diff-index --quiet HEAD --; then
+            echo "No changes"
+          else
+            curl https://api.telegram.org/bot$TELEGRAM_BOT_TOKEN/sendMessage -X POST -d chat_id=$TELEGRAM_CHAT_ID -d text="$(cat data/grades)"
+            git checkout -b data --track origin/data
+            git add data/grades
+            git commit -m "update data"
+            git show
+            git push
+          fi

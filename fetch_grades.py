@@ -29,7 +29,7 @@ def get_browser(headless=False):
 
 
 @retry(
-    stop=stop_after_attempt(5), before_sleep=before_sleep_log(logger, logging.WARNING)
+    stop=stop_after_attempt(2), before_sleep=before_sleep_log(logger, logging.WARNING)
 )
 def fetch_grades_table(username, password):
     browser = get_browser(headless=True)

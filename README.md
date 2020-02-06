@@ -14,9 +14,9 @@ A Github Action that sends you a Telegram message when you get a new grade on [n
 
 ## Setup
 
-- fork this repository
+- duplicate this repository
 
-  _important_: make the fork private if you don't want your grades to be public
+  _important_: if you don't want your grades to be public, don't use the "fork" feature. Instead, [duplicate the repository](https://help.github.com/en/github/creating-cloning-and-archiving-repositories/duplicating-a-repository#mirroring-a-repository) into a private repo you created
 
 - add two [secrets](https://help.github.com/en/actions/automating-your-workflow-with-github-actions/creating-and-using-encrypted-secrets) to your repository
 

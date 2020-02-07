@@ -31,7 +31,7 @@ def get_browser(headless=False):
 @retry(
     stop=stop_after_attempt(2), before_sleep=before_sleep_log(logger, logging.WARNING)
 )
-def fetch_grades_table(username, password):
+def fetch_grades_table(username, password, page):
     browser = get_browser(headless=True)
     try:
         # try to load grades webpage
@@ -41,10 +41,10 @@ def fetch_grades_table(username, password):
         login_form = browser.find_element_by_xpath("//form")
 
         username_field = login_form.find_element_by_name("username")
-        username_field.send_keys(ECP_SSO_USERNAME)
+        username_field.send_keys(username)
 
         password_field = login_form.find_element_by_name("password")
-        password_field.send_keys(ECP_SSO_PASSWORD)
+        password_field.send_keys(password)
 
         login_form.submit()
 
@@ -54,9 +54,7 @@ def fetch_grades_table(username, password):
         )
 
         # go to grades page
-        browser.get(
-            urllib.parse.urljoin(NOTES_ET_DOSSIER_URL, NOTES_ET_DOSSIER_GRADES_PAGE,)
-        )
+        browser.get(urllib.parse.urljoin(NOTES_ET_DOSSIER_URL, page))
 
         # extract grades table
         table = browser.find_element_by_xpath("//table[@summary='Affichage des notes']")
@@ -68,4 +66,8 @@ def fetch_grades_table(username, password):
 
 
 if __name__ == "__main__":
-    print(fetch_grades_table(ECP_SSO_USERNAME, ECP_SSO_PASSWORD))
+    print(
+        fetch_grades_table(
+            ECP_SSO_USERNAME, ECP_SSO_PASSWORD, NOTES_ET_DOSSIER_GRADES_PAGE
+        )
+    )

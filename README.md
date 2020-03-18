@@ -45,3 +45,36 @@ A Github Action that sends you a Telegram message when you get a new grade on [n
   - the action should run every 30 minutes in the future
 
     _disclaimer_: the action takes about 1 minute to run, which can eat a significant chunk of your 2000 minutes monthly quota, you can update the CRON expression in `.github/workflows/alert.yml` to make it run less frequently
+
+## Local development
+
+- [install poetry](https://python-poetry.org/docs/#installation)
+
+- install Python dependencies
+
+  ```bash
+  poetry install
+  ```
+
+- install the gecko driver for Selenium
+
+  on Mac:
+
+  ```bash
+  brew cask install geckodriver
+  ```
+
+- update `env.sh`
+
+- `export` the relevant environment variables
+
+  ```bash
+  source env.sh
+    export ECP_SSO_PASSWORD="your password"
+  ```
+
+- run the python script, it should print your grades in the console
+
+  ```bash
+  poetry run python fetch_grades.py
+  ```

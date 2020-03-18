@@ -7,7 +7,6 @@ import os
 from tenacity import retry, before_sleep_log, stop_after_attempt
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
-from selenium.webdriver.firefox.options import Options
 from selenium.webdriver.support import expected_conditions
 from selenium.webdriver.support.ui import WebDriverWait
 
@@ -23,9 +22,12 @@ logger.setLevel(logging.DEBUG)
 
 
 def get_browser(headless=False):
-    options = Options()
+    options = webdriver.FirefoxOptions()
     options.headless = headless
-    return webdriver.Firefox(options=options)
+    # XXX: cas.ecp.fr uses TLS 1.0
+    profile = webdriver.FirefoxProfile()
+    profile.set_preference("security.tls.version.enable-deprecated", True)
+    return webdriver.Firefox(options=options, firefox_profile=profile)
 
 
 @retry(

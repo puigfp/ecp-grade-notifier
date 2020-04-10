@@ -67,7 +67,7 @@ jobs:
           if git diff-index --quiet HEAD --; then
             echo "No changes"
           else
-            curl https://api.telegram.org/bot$TELEGRAM_BOT_TOKEN/sendMessage -X POST -d chat_id=$TELEGRAM_CHAT_ID --data-urlencode text="$(cat data/grades)"
+            curl https://api.telegram.org/bot$TELEGRAM_BOT_TOKEN/sendMessage -X POST -d chat_id=$TELEGRAM_CHAT_ID -d parse_mode=HTML -d text="<b>New grades available</b>%0A<code>$(git diff | grep '^[+-][^+-]')</code>"
             git checkout -b master --track origin/master
             git add data/grades
             git commit -m "update data"

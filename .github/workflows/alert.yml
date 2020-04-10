@@ -8,8 +8,8 @@ on:
 name: alert
 
 jobs:
-  backup:
-    name: backup
+  alert:
+    name: alert
     runs-on: ubuntu-latest
     steps:
       - uses: actions/setup-python@v1
